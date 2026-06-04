@@ -26,6 +26,17 @@
       statusMessage.classList.toggle('status-message--error', isError);
     };
 
+    const maskEmail = (email) => {
+      const [localPart, domain = ''] = email.split('@');
+
+      if (!domain) {
+        return email;
+      }
+
+      const maskedDomain = domain.replace(/[A-Za-z0-9]/g, '*');
+      return `${localPart}@${maskedDomain}`;
+    };
+
     const createCommentCard = (comment) => {
       const card = document.createElement('article');
       card.className = 'comment-card';
@@ -43,13 +54,23 @@
       body.className = 'comment-card__body';
       body.textContent = comment.body;
 
+      const actions = document.createElement('div');
+      actions.className = 'comment-card__actions';
+
+      const maskButton = document.createElement('button');
+      maskButton.className = 'comment-card__mask';
+      maskButton.type = 'button';
+      maskButton.textContent = 'Mask Email';
+      maskButton.addEventListener('click', () => maskCommentEmail(comment.id, email, maskButton));
+
       const deleteButton = document.createElement('button');
       deleteButton.className = 'comment-card__delete';
       deleteButton.type = 'button';
       deleteButton.textContent = 'Delete';
       deleteButton.addEventListener('click', () => deleteComment(comment.id, card, deleteButton));
 
-      card.append(name, email, body, deleteButton);
+      actions.append(maskButton, deleteButton);
+      card.append(name, email, body, actions);
       return card;
     };
 
@@ -99,6 +120,41 @@
         button.disabled = false;
         button.textContent = 'Delete';
         setStatus('Delete failed. Please try again.', true);
+        console.error(error);
+      }
+    }
+
+    async function maskCommentEmail(commentId, emailElement, button) {
+      const originalEmail = emailElement.textContent;
+      const maskedEmail = maskEmail(originalEmail);
+
+      if (maskedEmail === originalEmail) {
+        return;
+      }
+
+      emailElement.textContent = maskedEmail;
+      button.disabled = true;
+      button.textContent = 'Masking...';
+
+      try {
+        const response = await fetch(`${API_URL}/${commentId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email: maskedEmail })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Mask update failed with status ${response.status}`);
+        }
+
+        button.textContent = 'Masked';
+      } catch (error) {
+        emailElement.textContent = originalEmail;
+        button.disabled = false;
+        button.textContent = 'Mask Email';
+        setStatus('Email mask update failed. Please try again.', true);
         console.error(error);
       }
     }
