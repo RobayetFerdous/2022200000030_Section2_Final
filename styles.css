@@ -1,0 +1,117 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #1d2633;
+  background: #f3f5f8;
+}
+
+.page-shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0;
+}
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin-bottom: 22px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  line-height: 1.1;
+}
+
+.status-message {
+  margin: 0;
+  color: #526173;
+  font-weight: 700;
+}
+
+.status-message--error {
+  color: #b42318;
+}
+
+.comment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.comment-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 260px;
+  padding: 20px;
+  border: 1px solid #d9e1ea;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(29, 38, 51, 0.08);
+}
+
+.comment-card__name {
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  font-weight: 700;
+  color: #172033;
+}
+
+.comment-card__email {
+  margin: 0 0 16px;
+  color: #2f6f8f;
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+
+.comment-card__body {
+  flex: 1;
+  margin: 0 0 20px;
+  color: #3d4857;
+  line-height: 1.55;
+}
+
+.comment-card__delete {
+  align-self: flex-start;
+  min-width: 92px;
+  border: 0;
+  border-radius: 6px;
+  padding: 10px 16px;
+  color: #ffffff;
+  background: #c2412f;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.comment-card__delete:hover:not(:disabled),
+.comment-card__delete:focus-visible:not(:disabled) {
+  background: #9f3426;
+  transform: translateY(-1px);
+}
+
+.comment-card__delete:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+@media (max-width: 520px) {
+  .page-shell {
+    width: min(100% - 20px, 1180px);
+    padding: 22px 0;
+  }
+
+  .comment-card {
+    padding: 16px;
+  }
+}

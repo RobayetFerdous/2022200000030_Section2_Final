@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comment Records</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page-shell">
+    <header class="page-header">
+      <h1>Comment Records</h1>
+      <p id="statusMessage" class="status-message">Loading comments...</p>
+    </header>
+
+    <section id="commentGrid" class="comment-grid" aria-live="polite"></section>
+  </main>
+
+  <script>
+    const API_URL = 'https://jsonplaceholder.typicode.com/comments';
+    const commentGrid = document.querySelector('#commentGrid');
+    const statusMessage = document.querySelector('#statusMessage');
+
+    const setStatus = (message, isError = false) => {
+      statusMessage.textContent = message;
+      statusMessage.classList.toggle('status-message--error', isError);
+    };
+
+    const createCommentCard = (comment) => {
+      const card = document.createElement('article');
+      card.className = 'comment-card';
+      card.dataset.commentId = comment.id;
+
+      const name = document.createElement('h2');
+      name.className = 'comment-card__name';
+      name.textContent = comment.name;
+
+      const email = document.createElement('p');
+      email.className = 'comment-card__email';
+      email.textContent = comment.email;
+
+      const body = document.createElement('p');
+      body.className = 'comment-card__body';
+      body.textContent = comment.body;
+
+      const deleteButton = document.createElement('button');
+      deleteButton.className = 'comment-card__delete';
+      deleteButton.type = 'button';
+      deleteButton.textContent = 'Delete';
+      deleteButton.addEventListener('click', () => deleteComment(comment.id, card, deleteButton));
+
+      card.append(name, email, body, deleteButton);
+      return card;
+    };
+
+    const renderComments = (comments) => {
+      const fragment = document.createDocumentFragment();
+      comments.forEach((comment) => {
+        fragment.appendChild(createCommentCard(comment));
+      });
+
+      commentGrid.replaceChildren(fragment);
+      setStatus(`${comments.length} comments loaded`);
+    };
+
+    async function loadComments() {
+      try {
+        const response = await fetch(API_URL);
+
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        const comments = await response.json();
+        renderComments(comments);
+      } catch (error) {
+        setStatus('Unable to load comments. Please try again later.', true);
+        console.error(error);
+      }
+    }
+
+    async function deleteComment(commentId, card, button) {
+      button.disabled = true;
+      button.textContent = 'Deleting...';
+
+      try {
+        const response = await fetch(`${API_URL}/${commentId}`, {
+          method: 'DELETE'
+        });
+
+        if (!response.ok) {
+          throw new Error(`Delete failed with status ${response.status}`);
+        }
+
+        card.remove();
+        const remainingCards = commentGrid.querySelectorAll('.comment-card').length;
+        setStatus(`${remainingCards} comments loaded`);
+      } catch (error) {
+        button.disabled = false;
+        button.textContent = 'Delete';
+        setStatus('Delete failed. Please try again.', true);
+        console.error(error);
+      }
+    }
+
+    loadComments();
+  </script>
+</body>
+</html>
